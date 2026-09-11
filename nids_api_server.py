@@ -734,4 +734,6 @@ if __name__ == '__main__':
     print(f"    GET  /api/health         — Health check")
     print(f"\n  Running on http://0.0.0.0:5000")
     print("="*55 + "\n")
-    app.run(host="0.0.0.0", port=8000, debug=False)
+    import os
+port = int(os.environ.get("PORT", 8000))
+app.run(host="0.0.0.0", port=port, debug=False)
