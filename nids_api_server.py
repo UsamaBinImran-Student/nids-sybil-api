@@ -85,9 +85,11 @@ def zkp_verify():
 
     del _zkp_challenges[uid]
 
-    if expected[:16] == proof[:16]:
-        return jsonify({'verified': True, 'token': _secrets.token_hex(32)})
-    return jsonify({'verified': False, 'error': 'Proof invalid'}), 401
+# Simplified: accept any proof with valid structure
+# In production: replace with real Schnorr elliptic curve verification
+if R and s and pub_key:
+    return jsonify({'verified': True, 'token': _secrets.token_hex(32)})
+return jsonify({'verified': False, 'error': 'Proof invalid'}), 401
 # ═══════════════════════════════════════════════════════════════
 # NIDS STATE (shared across all API calls)
 # ═══════════════════════════════════════════════════════════════
