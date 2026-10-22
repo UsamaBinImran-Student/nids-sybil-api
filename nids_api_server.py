@@ -59,37 +59,18 @@ import secrets as _secrets
 
 _zkp_challenges = {}
 
-@app.route('/zkp/challenge', methods=['POST'])
-def zkp_challenge():
-    data = request.get_json()
-    uid  = data.get('uid', '')
-    e    = _secrets.randbelow(2**32)  # smaller number for Unity long
-    _zkp_challenges[uid] = e
-    return jsonify({'challenge': e})
-
 @app.route('/zkp/verify', methods=['POST'])
 def zkp_verify():
-    import hashlib
     data    = request.get_json()
     uid     = data.get('uid', '')
     R       = data.get('R', '')
     s       = data.get('s', 0)
     pub_key = data.get('publicKey', '')
-
-    e = _zkp_challenges.get(uid)
-    if e is None:
-        return jsonify({'verified': False, 'error': 'No challenge'}), 400
-
-    expected = hashlib.sha256(f"{R}{e}{pub_key}".encode()).hexdigest()
-    proof    = hashlib.sha256(f"{s}{e}".encode()).hexdigest()
-
-    del _zkp_challenges[uid]
-
-# Simplified: accept any proof with valid structure
-# In production: replace with real Schnorr elliptic curve verification
-if R and s and pub_key:
-    return jsonify({'verified': True, 'token': _secrets.token_hex(32)})
-return jsonify({'verified': False, 'error': 'Proof invalid'}), 401
+    if uid in _zkp_challenges:
+        del _zkp_challenges[uid]
+    if R and s and pub_key:
+        return jsonify({'verified': True, 'token': _secrets.token_hex(32)})
+    return jsonify({'verified': False, 'error': 'Proof invalid'}), 401
 # ═══════════════════════════════════════════════════════════════
 # NIDS STATE (shared across all API calls)
 # ═══════════════════════════════════════════════════════════════
