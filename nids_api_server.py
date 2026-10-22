@@ -58,7 +58,13 @@ CORS(app)  # Allow Unity WebGL and any origin
 import secrets as _secrets
 
 _zkp_challenges = {}
-
+@app.route('/zkp/challenge', methods=['POST'])
+def zkp_challenge():
+    data = request.get_json()
+    uid  = data.get('uid', '')
+    e    = _secrets.randbelow(2**31)
+    _zkp_challenges[uid] = e
+    return jsonify({'challenge': e})
 @app.route('/zkp/verify', methods=['POST'])
 def zkp_verify():
     data    = request.get_json()
@@ -738,18 +744,8 @@ if __name__ == '__main__':
     print("  NIDS API Server — Unity 3D VR Integration")
     print("="*55)
     print(f"  NIDS modules: {'Loaded ✅' if FULL_NIDS else 'Standalone mode ⚠️'}")
-    print(f"  Endpoints:")
-    print(f"    POST /api/register       — Register VR node")
-    print(f"    POST /api/authenticate   — Auth + detect Sybil")
-    print(f"    GET  /api/network        — Full graph for Unity")
-    print(f"    POST /api/interact       — Add peer edge")
-    print(f"    POST /api/revoke         — Phase 4 revocation")
-    print(f"    POST /api/simulate       — Inject test nodes")
-    print(f"    GET  /api/stats          — System stats")
-    print(f"    GET  /api/leaderboard    — Top suspicious nodes")
-    print(f"    GET  /api/health         — Health check")
-    print(f"\n  Running on http://0.0.0.0:5000")
     print("="*55 + "\n")
-    import os
+
+import os
 port = int(os.environ.get("PORT", 8000))
 app.run(host="0.0.0.0", port=port, debug=False)
